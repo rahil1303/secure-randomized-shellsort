@@ -1,0 +1,167 @@
+syntax = "proto3";
+
+package shellsort;
+
+// ============================================================================
+// PHASE 0: ELEMENT STORAGE
+// ============================================================================
+
+message InitialDataRequest {
+    int32 total_elements = 1;
+}
+
+message InitialDataResponse {
+    bool success = 1;
+    string error_message = 2;
+}
+
+message InitialDataBatchRequest {
+    repeated bytes batch_elements = 1;  // encrypted elements
+    int32 batch_start_index = 2;
+    int32 batch_size = 3;
+}
+
+message InitialDataBatchResponse {
+    bool success = 1;
+    string error_message = 2;
+}
+
+message FinalizeInitialDataRequest {
+    // empty for now
+}
+
+message FinalizeInitialDataResponse {
+    bool success = 1;
+    string error_message = 2;
+    int32 total_stored = 3;
+}
+
+message ReadAbElementRequest {
+    int32 position = 1;
+}
+
+message ReadAbElementResponse {
+    bool success = 1;
+    bytes element = 2;  // encrypted element
+    string error_message = 3;
+}
+
+// ============================================================================
+// PHASE 1: HASH ARRAY STREAMING (ALREADY EXISTS)
+// ============================================================================
+
+message InitializeHashArrayRequest {
+    int32 expected_size = 1;
+}
+
+message InitializeHashArrayResponse {
+    bool success = 1;
+    int32 expected_size = 2;
+}
+
+message SendHashValueRequest {
+    bytes encrypted_hash = 1;
+    int32 index = 2;
+}
+
+message SendHashValueResponse {
+    bool success = 1;
+}
+
+message FinalizeHashArrayRequest {
+    // empty
+}
+
+message FinalizeHashArrayResponse {
+    bool success = 1;
+    int32 received = 2;
+    int32 expected = 3;
+}
+
+message UseHashArrayForSortingRequest {
+    // empty
+}
+
+message UseHashArrayForSortingResponse {
+    bool success = 1;
+    int32 array_size = 2;
+}
+
+// ============================================================================
+// PHASE 2: RANDOMIZED SHELL SORT (ALREADY EXISTS)
+// ============================================================================
+
+message InitRequest {
+    repeated bytes encrypted_array = 1;
+}
+
+message InitResponse {
+    bool success = 1;
+    int32 array_size = 2;
+}
+
+message GetPairRequest {
+    int32 index_a = 1;
+    int32 index_b = 2;
+}
+
+message GetPairResponse {
+    bytes encrypted_a = 1;
+    bytes encrypted_b = 2;
+}
+
+message WritePairRequest {
+    int32 index_a = 1;
+    int32 index_b = 2;
+    bytes new_encrypted_a = 3;
+    bytes new_encrypted_b = 4;
+}
+
+message WritePairResponse {
+    bool success = 1;
+}
+
+message MateRequest {
+    int32 size = 1;
+    int32 seed = 2;
+    int32 index = 3;
+}
+
+message MateResponse {
+    int32 mate = 1;
+}
+
+message FinalArrayRequest {
+    // empty
+}
+
+message FinalArrayResponse {
+    repeated bytes encrypted_array = 1;
+    int32 total_comparisons = 2;
+    int32 total_writes = 3;
+}
+
+// ============================================================================
+// SERVICE DEFINITION
+// ============================================================================
+
+service ShellSortService {
+    // Phase 0: Element Storage
+    rpc InitializeInitialData(InitialDataRequest) returns (InitialDataResponse);
+    rpc UploadInitialDataBatch(InitialDataBatchRequest) returns (InitialDataBatchResponse);
+    rpc FinalizeInitialData(FinalizeInitialDataRequest) returns (FinalizeInitialDataResponse);
+    rpc ReadAbElement(ReadAbElementRequest) returns (ReadAbElementResponse);
+    
+    // Phase 1: Hash Array Streaming
+    rpc InitializeHashArray(InitializeHashArrayRequest) returns (InitializeHashArrayResponse);
+    rpc SendHashValue(SendHashValueRequest) returns (SendHashValueResponse);
+    rpc FinalizeHashArray(FinalizeHashArrayRequest) returns (FinalizeHashArrayResponse);
+    rpc UseHashArrayForSorting(UseHashArrayForSortingRequest) returns (UseHashArrayForSortingResponse);
+    
+    // Phase 2: Randomized Shell Sort
+    rpc Initialize(InitRequest) returns (InitResponse);
+    rpc GetPair(GetPairRequest) returns (GetPairResponse);
+    rpc WritePair(WritePairRequest) returns (WritePairResponse);
+    rpc GetMate(MateRequest) returns (MateResponse);
+    rpc GetFinalArray(FinalArrayRequest) returns (FinalArrayResponse);
+}
